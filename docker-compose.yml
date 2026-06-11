@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: erp-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: erp-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/workflow_erp
+      - JWT_SECRET=change_me_to_a_random_string_for_production
+      # - RESEND_API_KEY=your_resend_key
+      # - SENDER_EMAIL=your_sender_email
+      # - OFFICE_LAT=19.0760
+      # - OFFICE_LON=72.8777
+      # - MAX_RADIUS_METERS=100.0
+      # - STRICT_ATTENDANCE_CHECK=false
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: erp-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
